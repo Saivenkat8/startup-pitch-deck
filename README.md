@@ -15,7 +15,7 @@ Multi-agent pipeline that turns a short startup idea into **market research**, *
 | **3. Finance** | Financial analyst | JSON output validated against a **Pydantic** `FinancialStrategy` schema (revenue streams, pricing, costs, investment, logic). |
 | **4. Pitch** | Pitch creator | Single Marp-friendly Markdown deck from the three prior stages (no invented numbers—uses only supplied context). |
 
-The **orchestrator** chains these steps, **file-caches** intermediate artifacts (`market_cache.txt`, `product_cache.txt`, `finance_cache.txt`), and writes **`final_pitch_deck.md`** on success.
+The **orchestrator** chains these steps, **file-caches** intermediate artifacts (`market_cache.txt`, `product_cache.txt`, `finance_cache.txt`) **during** a run, writes **`final_pitch_deck.md`** on success, then **deletes those three cache files** so the next run starts clean.
 
 **Clarification flow:** If the market agent ends with a question, the pipeline returns `{ "status": "paused", "data": "..." }` without writing the market cache. Call again with the same idea and a `clarification` string to resume. The **Streamlit** UI supports this flow.
 
@@ -79,7 +79,7 @@ From the **repository root** (after `pip install -e .`):
 streamlit run frontend/app.py
 ```
 
-Enter your idea, run the pipeline, and answer any follow-up question from the market analyst. Your original idea is kept in session state when you submit a clarification.
+Enter your idea, run the pipeline, and answer any follow-up question from the market analyst. Your original idea is kept in session state when you submit a clarification. After a **successful** deck, intermediate caches are **cleared automatically** and the UI shows the result with **Create another pitch** to reset the session.
 
 ### CLI / script
 
@@ -93,9 +93,9 @@ Or use the console entry point (after editable install):
 startup-pipeline
 ```
 
-### Clear caches
+### Caches
 
-Delete `market_cache.txt`, `product_cache.txt`, and/or `finance_cache.txt` to force regeneration of those steps.
+On **success**, the three step caches are removed automatically. To force a mid-run reset (e.g. after an error or aborted run), delete `market_cache.txt`, `product_cache.txt`, and/or `finance_cache.txt` manually. **`final_pitch_deck.md` is kept** as the last successful output.
 
 ---
 

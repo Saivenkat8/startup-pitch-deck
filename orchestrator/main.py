@@ -6,6 +6,19 @@ from agents.product_manager import product_manager_agent
 from agents.financial_analyst import financial_analyst_agent, FinancialStrategy
 from agents.pitch_creater import pitch_creator_agent
 
+_PIPELINE_CACHE_FILES = ("market_cache.txt", "product_cache.txt", "finance_cache.txt")
+
+
+def clear_pipeline_caches() -> None:
+    """Remove step caches so the next run regenerates market → product → finance."""
+    for fname in _PIPELINE_CACHE_FILES:
+        if os.path.isfile(fname):
+            try:
+                os.remove(fname)
+            except OSError:
+                pass
+    print("   -> 🗑️  Cleared pipeline caches (market, product, finance).")
+
 
 def run_startup_pipeline(user_idea: str, clarification: str | None = None):
     if clarification:
@@ -75,6 +88,8 @@ def run_startup_pipeline(user_idea: str, clarification: str | None = None):
 
     with open("final_pitch_deck.md", "w", encoding="utf-8") as f:
         f.write(str(pitch_deck_markdown))
+
+    clear_pipeline_caches()
 
     print("\n✅ Success! Pitch deck saved to 'final_pitch_deck.md'")
 
